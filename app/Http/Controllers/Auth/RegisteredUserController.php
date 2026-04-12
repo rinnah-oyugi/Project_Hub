@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -33,26 +34,29 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', Rule::in(['student', 'supervisor'])],
+            'university_id' => ['required', 'string', 'max:255'],
+            'department' => ['required', 'string', 'max:255'],
         ]);
 
-
-            $user = User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'student',
+            'role' => $request->role,
             'university_id' => $request->university_id,
             'department' => $request->department,
-            'degree' => $request->degree,
-            'graduation_year' => $request->graduation_year,
-            'thesis_topic' => $request->thesis_topic,
+            'is_approved' => $request->role === 'student',
         ]);
-        
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        
-    return redirect(route('proposal.create', absolute: false));
+        if ($user->role === 'supervisor') {
+            return redirect()->route('supervisor.dashboard');
+        }
+
+        return redirect()->route('dashboard');
     }
 }

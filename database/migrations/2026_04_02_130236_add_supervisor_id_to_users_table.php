@@ -12,27 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            
             if (!Schema::hasColumn('users', 'role')) {
                 $table->string('role')->default('student'); 
             }
             if (!Schema::hasColumn('users', 'is_approved')) {
                 $table->boolean('is_approved')->default(0); 
             }
-
-            
             if (!Schema::hasColumn('users', 'supervisor_id')) {
                 $table->foreignId('supervisor_id')->nullable()->constrained('users')->onDelete('set null');
             }
             
-          
-            $table->string('project_title')->nullable();
-            $table->text('project_description')->nullable();
-            $table->string('request_status')->default('none'); 
-            
-            
-            $table->string('phone_number')->nullable();
-            $table->string('office_location')->nullable();
+            // Adding checks to the rest of the columns to prevent the "Duplicate Column" error
+            if (!Schema::hasColumn('users', 'project_description')) {
+                $table->text('project_description')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'request_status')) {
+                $table->string('request_status')->default('none'); 
+            }
+            if (!Schema::hasColumn('users', 'phone_number')) {
+                $table->string('phone_number')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'office_location')) {
+                $table->string('office_location')->nullable();
+            }
         });
     }
 

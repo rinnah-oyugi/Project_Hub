@@ -67,6 +67,17 @@
             </p>
         </div>
 
+        @if ($errors->any())
+            <div class="mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+                <p class="font-black uppercase text-[10px] tracking-widest text-amber-800 mb-2">Please fix the following</p>
+                <ul class="list-disc list-inside space-y-1 font-medium">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('register') }}" class="space-y-6">
             @csrf
             <input type="hidden" name="role" value="{{ $role }}">

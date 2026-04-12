@@ -24,17 +24,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // 1. Validate credentials
         $request->authenticate();
 
-        // 2. Refresh session to prevent fixation attacks
         $request->session()->regenerate();
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-
-        // 3. THE MASTER SWITCH
-        // We use redirect()->route() to ensure they hit the specific 
-        // Controller logic for their role (like the approval checks).
 
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -48,8 +43,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // Fallback for unexpected roles
-        return redirect('/');
+        return redirect()->route('login');
     }
 
     /**

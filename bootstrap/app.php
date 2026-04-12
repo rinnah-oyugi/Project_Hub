@@ -11,14 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Register your security alias here
+        // Hub gate: use `approved` on authenticated route groups in routes/web.php
         $middleware->alias([
             'approved' => \App\Http\Middleware\EnsureAccountIsApproved::class,
+            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
         ]);
 
         $middleware->redirectTo(
             guests: '/login',
-            users: '/dashboard', 
+            users: '/dashboard',
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {

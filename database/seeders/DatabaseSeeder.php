@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'supervisor@test.com',
             'password' => Hash::make('password'),
             'role' => 'supervisor',
-            'is_approved' => true, // So they show up in the student's dropdown
+            'is_approved' => true,
+            'university_id' => 'FAC-CS-001',
             'department' => 'Computer Science',
         ]);
 
@@ -29,13 +30,14 @@ class DatabaseSeeder extends Seeder
             'email' => 'riina@test.com',
             'password' => Hash::make('password'),
             'role' => 'student',
+            'is_approved' => true,
             'university_id' => 'CS-301',
             'department' => 'Computer Science',
             'degree' => 'BSc IT',
             'graduation_year' => '2026',
-            'supervisor_id' => $supervisor->id, // Automatically link to Dr. Smith
+            'supervisor_id' => $supervisor->id,
             'project_title' => 'Automated Project Management Hub',
-            'request_status' => 'pending', // Starts in the Amber state
+            'request_status' => 'pending',
         ]);
 
         // 3. Create an Admin (Optional)
@@ -44,6 +46,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@test.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
+            'is_approved' => true,
+            'university_id' => 'ADM-001',
+            'department' => 'Administration',
         ]);
     }
 }

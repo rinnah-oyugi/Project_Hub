@@ -16,24 +16,17 @@ class User extends Authenticatable
      * Includes your 
      */
     protected $fillable = [
-        // Basic Authentication
         'name',
         'email',
         'password',
         'role',
-        
-        
-        'university_id',    
-        'department',       
-        'degree',           
-        'graduation_year',  
-        
-        // Our Project Hub Proposal Fields
-        'supervisor_id',      
-        'project_title',      
+        'university_id',
+        'department',
+        'is_approved',
+        'supervisor_id',
+        'project_title',
         'project_description',
-        'request_status',     
-        'is_approved',        
+        'request_status',
     ];
 
     protected $hidden = [
@@ -59,5 +52,15 @@ class User extends Authenticatable
     public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
+    }
+
+    public function hasProposal(): bool
+    {
+        return ! empty($this->project_title);
     }
 }

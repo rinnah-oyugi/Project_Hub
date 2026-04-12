@@ -9,12 +9,27 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureAccountIsApproved
 {
     /**
-     * Handle an incoming request.
+     * Supervisors need admin approval; students are active by default.
+     * Admins always pass.
      *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        $user = $request->user();
+
+        if (! $user) {
+            return $next($request);
+        }
+
+        if ($user->role === 'admin' || $user->role === 'student' || $user->is_approved) {
+            return $next($request);
+        }
+
+        if ($request->routeIs('account.pending', 'verification.*', 'logout')) {
+            return $next($request);
+        }
+
+        return redirect()->route('account.pending');
     }
 }

@@ -28,7 +28,8 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('proposal.store') }}" class="space-y-8 pb-32"> @csrf 
+    <form method="POST" action="{{ route('proposal.store') }}" class="space-y-8 pb-32">
+        @csrf
         
         <section class="space-y-4">
             <h4 class="text-xs font-semibold tracking-wider uppercase text-slate-400">1 · Supervision</h4>

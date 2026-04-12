@@ -19,9 +19,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Pending approval (must stay outside `approved` middleware to avoid redirect loops)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/account/pending', function () {
+        $user = Auth::user();
+
+        if ($user->role === 'admin' || $user->role === 'student' || $user->is_approved) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.pending');
+    })->name('account.pending');
+});
+
 // --- AUTHENTICATED & APPROVED ROUTES ---
 Route::middleware(['auth', 'verified', 'approved'])->group(function () {
-    
+
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = Auth::user();
@@ -35,36 +48,46 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         }
 
         if ($user->role === 'student') {
-            if ($user->request_status === 'none' && empty($user->project_title)) {
-                return redirect()->route('proposal.create');
-            }
-            return view('dashboard'); 
+            $user->load(['chapters' => fn ($q) => $q->orderByDesc('id')]);
+            $supervisors = User::query()
+                ->where('role', 'supervisor')
+                ->where('is_approved', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'email']);
+
+            return view('dashboard', compact('supervisors'));
         }
 
-        return redirect('/');
+        return redirect()->route('login');
     })->name('dashboard');
 
-    // ADMIN ROUTES
-    Route::get('/admin/dashboard', function () { 
-        return view('admin.dashboard'); 
-    })->name('admin.dashboard');
-
-    // Updated to use the UserController method as requested
-    Route::post('/admin/approve-user/{id}', [UserController::class, 'approveUser'])->name('admin.approve.user');
+    // ADMIN ROUTES (isolated middleware keeps heavy work scoped and avoids accidental access)
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/dashboard', [UserController::class, 'adminDashboard'])->name('admin.dashboard');
+        Route::post('/admin/approve-user/{id}', [UserController::class, 'approveUser'])->name('admin.approve.user');
+    });
 
     // SUPERVISOR ROUTES
     Route::get('/supervisor/dashboard', [UserController::class, 'supervisorDashboard'])->name('supervisor.dashboard');
     Route::post('/status/update/{id}', [UserController::class, 'updateStatus'])->name('status.update');
-    Route::post('/chapter/feedback/{id}', [ChapterController::class, 'updateFeedback'])->name('chapter.feedback');
+    Route::post('/chapter/feedback/{chapter}', [ChapterController::class, 'updateFeedback'])->name('chapter.feedback');
+    Route::post('/chapter/{chapter}/reopen', [ChapterController::class, 'reopenChapter'])->name('chapter.reopen');
+    Route::get('/chapter/download/{chapter}', [ChapterController::class, 'download'])->name('chapter.download');
 
     // STUDENT ROUTES
     Route::get('/proposal', function () {
-        $supervisors = User::where('role', 'supervisor')->where('is_approved', true)->get();
+        $supervisors = User::query()
+            ->where('role', 'supervisor')
+            ->where('is_approved', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
         return view('student.proposal', compact('supervisors'));
     })->name('proposal.create');
 
     Route::post('/proposal/store', [ProposalController::class, 'store'])->name('proposal.store');
     Route::post('/chapter/store', [ChapterController::class, 'store'])->name('chapter.store');
+    Route::patch('/chapter/{chapter}/revise', [ChapterController::class, 'updateStudentChapter'])->name('chapter.update');
 });
 
 // --- SHARED PROFILE & SYSTEM ROUTES ---
@@ -77,5 +100,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
 });
 
-// Fixed the typo here: removed the "-"
 require __DIR__.'/auth.php';
