@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>ProjectHub · Join the Stream</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -52,7 +58,7 @@
         
         <div class="text-center mb-10">
             <div class="inline-flex p-3 bg-white shadow-lg rounded-2xl mb-6">
-                <span class="text-3xl material-icons hub-accent-dynamic">hub</span>
+                <img src="{{ asset('favicon.svg') }}" alt="ProjectHub Icon" class="h-8 w-8">
             </div>
             
             <div class="mb-4">

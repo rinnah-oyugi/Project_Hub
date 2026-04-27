@@ -5,6 +5,11 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>University Project Hub - Login</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     
@@ -39,7 +44,7 @@
 
             <div class="relative z-10 max-w-lg text-center">
                 <div class="inline-flex items-center justify-center p-5 mb-8 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-2xl border-white/20">
-                    <span class="text-5xl text-white material-icons">school</span>
+                    <img src="{{ asset('favicon.svg') }}" alt="ProjectHub Icon" class="h-12 w-12">
                 </div>
                 <h1 class="mb-6 text-5xl font-bold leading-tight text-white xl:text-6xl drop-shadow-lg">
                     Project_Hub

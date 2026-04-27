@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ProjectHub | Research Management</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -21,7 +27,7 @@
     <nav class="flex items-center justify-between px-10 py-6 bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
         <div class="flex items-center gap-2">
             <div class="p-2 bg-amber-500 rounded-lg shadow-lg shadow-amber-500/20">
-                <span class="material-icons text-white">hub</span>
+                <img src="{{ asset('favicon.svg') }}" alt="ProjectHub Icon" class="h-6 w-6">
             </div>
             <span class="text-xl font-black tracking-tighter text-slate-900 uppercase">ProjectHub</span>
         </div>

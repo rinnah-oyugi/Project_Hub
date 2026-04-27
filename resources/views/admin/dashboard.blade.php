@@ -6,10 +6,16 @@
                     <span class="material-icons text-white text-xl" aria-hidden="true">shield</span>
                 </div>
                 <div>
-                    <h2 class="font-black text-3xl text-white leading-tight tracking-tight uppercase">
+                    <h2 class="text-2xl font-black text-white tracking-tight uppercase flex items-center gap-3">
                         Admin <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Control</span>
                     </h2>
                     <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Governance · approvals · access</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('admin.export.users') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-400/30 transition hover:from-emerald-500 hover:to-emerald-600 active:scale-[0.98]">
+                        <span class="material-icons text-sm" aria-hidden="true">download</span>
+                        Export Users
+                    </a>
                 </div>
             </div>
         </div>
@@ -275,25 +281,6 @@
                                                         Reset
                                                     </button>
                                                 </form>
-
-                                                <!-- Suspend/Readmit -->
-                                                @if($user->is_approved)
-                                                    <form action="{{ route('admin.suspend.user', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Suspend student {{ $user->name }}?')">
-                                                        @csrf
-                                                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-600 to-orange-700 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-orange-600/25 ring-1 ring-orange-400/30 transition hover:from-orange-500 hover:to-orange-600 active:scale-[0.98]">
-                                                            <span class="material-icons text-sm" aria-hidden="true">block</span>
-                                                            Suspend
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <form action="{{ route('admin.readmit.user', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Reactivate student {{ $user->name }}?')">
-                                                        @csrf
-                                                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-400/30 transition hover:from-emerald-500 hover:to-emerald-600 active:scale-[0.98]">
-                                                            <span class="material-icons text-sm" aria-hidden="true">check_circle</span>
-                                                            Readmit
-                                                        </button>
-                                                    </form>
-                                                @endif
 
                                                 <!-- Delete -->
                                                 <form action="{{ route('admin.delete.user', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete student {{ $user->name }}? This action cannot be undone!')">

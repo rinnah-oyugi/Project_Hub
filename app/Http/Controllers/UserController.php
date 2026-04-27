@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use Illuminate\Http\Response;
 use App\Jobs\SendPasswordResetNotification;
 use App\Jobs\SendUserStatusNotification;
 
@@ -161,6 +162,58 @@ class UserController extends Controller
     }
 
     /**
+     * Admin Action: Export user list to CSV
+     */
+    public function exportUsers()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $users = User::where('role', '!=', 'admin')
+            ->orderBy('role')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at']);
+
+        $filename = "projecthub_users_" . date('Y-m-d_H-i-s') . ".csv";
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($users) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Header
+            fputcsv($file, [
+                'ID', 'Name', 'Email', 'Role', 'University ID', 
+                'Department', 'Status', 'Registration Date'
+            ]);
+            
+            // CSV Data
+            foreach ($users as $user) {
+                $status = $user->role === 'student' ? 'Active' : ($user->is_approved ? 'Active' : 'Suspended');
+                
+                fputcsv($file, [
+                    $user->id,
+                    $user->name,
+                    $user->email,
+                    ucfirst($user->role),
+                    $user->university_id ?? 'N/A',
+                    $user->department ?? 'N/A',
+                    $status,
+                    $user->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
+    }
+
+    /**
      * Admin Action: Trigger password reset for a user
      */
     public function triggerPasswordReset($id)
@@ -194,10 +247,6 @@ class UserController extends Controller
         
         if ($user->role === 'admin') {
             return redirect()->back()->with('error', 'Cannot readmit admin accounts.');
-        }
-
-        if ($user->role === 'student') {
-            return redirect()->back()->with('error', 'Students are always active by default.');
         }
 
         if ($user->is_approved) {

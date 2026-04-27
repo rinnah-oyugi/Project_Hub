@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::post('/admin/readmit-user/{id}', [UserController::class, 'readmitUser'])->name('admin.readmit.user');
     Route::delete('/admin/delete-user/{id}', [UserController::class, 'deleteUser'])->name('admin.delete.user');
     Route::post('/admin/reset-password/{id}', [UserController::class, 'triggerPasswordReset'])->name('admin.reset.password');
+    Route::get('/admin/export-users', [UserController::class, 'exportUsers'])->name('admin.export.users');
 });
 
 // --- SHARED PROFILE & SYSTEM ROUTES ---
