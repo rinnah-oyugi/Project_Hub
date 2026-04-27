@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+use App\Jobs\SendPasswordResetNotification;
+use App\Jobs\SendUserStatusNotification;
 
 class UserController extends Controller
 {
@@ -21,7 +26,13 @@ class UserController extends Controller
         $directoryUsers = User::query()
             ->where('role', '!=', 'admin')
             ->orderByDesc('created_at')
-            ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at']);
+            ->with(['students' => function($query) {
+                $query->select('id', 'supervisor_id', 'name');
+            }])
+            ->with(['supervisor' => function($query) {
+                $query->select('id', 'name');
+            }])
+            ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at', 'supervisor_id']);
 
         $pendingSupervisors = $directoryUsers->where('role', 'supervisor')->where('is_approved', false)->count();
 
@@ -94,5 +105,111 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->back()->with('success', "Supervisor access granted for {$user->name}.");
+    }
+
+    /**
+     * Admin Action: Suspend a user account
+     */
+    public function suspendUser($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+        
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Cannot suspend admin accounts.');
+        }
+
+        if ($user->is_approved === false) {
+            return redirect()->back()->with('error', 'User is already suspended.');
+        }
+
+        $user->is_approved = false;
+        $user->save();
+
+        // Send suspension notification
+        SendUserStatusNotification::dispatch($user, 'suspend');
+
+        return redirect()->back()->with('success', "User {$user->name} has been suspended.");
+    }
+
+    /**
+     * Admin Action: Delete a user account (with safety checks)
+     */
+    public function deleteUser($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+        
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Cannot delete admin accounts.');
+        }
+
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'Cannot delete your own account.');
+        }
+
+        $userName = $user->name;
+        $user->delete();
+
+        return redirect()->back()->with('success', "User {$userName} has been permanently deleted.");
+    }
+
+    /**
+     * Admin Action: Trigger password reset for a user
+     */
+    public function triggerPasswordReset($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+        
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Cannot trigger password reset for admin accounts.');
+        }
+
+        // Dispatch password reset notification job (asynchronous)
+        SendPasswordResetNotification::dispatch($user);
+
+        return redirect()->back()->with('success', "Password reset link sent to {$user->name}'s email ({$user->email}).");
+    }
+
+    /**
+     * Admin Action: Readmit/Reactivate a suspended user
+     */
+    public function readmitUser($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $user = User::findOrFail($id);
+        
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Cannot readmit admin accounts.');
+        }
+
+        if ($user->role === 'student') {
+            return redirect()->back()->with('error', 'Students are always active by default.');
+        }
+
+        if ($user->is_approved) {
+            return redirect()->back()->with('error', 'User is already active.');
+        }
+
+        $user->is_approved = true;
+        $user->save();
+
+        // Send readmit notification
+        SendUserStatusNotification::dispatch($user, 'readmit');
+
+        return redirect()->back()->with('success', "User {$user->name} has been readmitted and can now access the system.");
     }
 }

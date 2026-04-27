@@ -61,15 +61,10 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         return redirect()->route('login');
     })->name('dashboard');
 
-    // ADMIN ROUTES (isolated middleware keeps heavy work scoped and avoids accidental access)
-    Route::middleware('admin')->group(function () {
-        Route::get('/admin/dashboard', [UserController::class, 'adminDashboard'])->name('admin.dashboard');
-        Route::post('/admin/approve-user/{id}', [UserController::class, 'approveUser'])->name('admin.approve.user');
-    });
-
     // SUPERVISOR ROUTES
     Route::get('/supervisor/dashboard', [UserController::class, 'supervisorDashboard'])->name('supervisor.dashboard');
     Route::post('/status/update/{id}', [UserController::class, 'updateStatus'])->name('status.update');
+    Route::post('/proposal/feedback/{studentId}', [ProposalController::class, 'updateProposalFeedback'])->name('proposal.feedback');
     Route::post('/chapter/feedback/{chapter}', [ChapterController::class, 'updateFeedback'])->name('chapter.feedback');
     Route::post('/chapter/{chapter}/reopen', [ChapterController::class, 'reopenChapter'])->name('chapter.reopen');
     Route::get('/chapter/download/{chapter}', [ChapterController::class, 'download'])->name('chapter.download');
@@ -90,11 +85,22 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::patch('/chapter/{chapter}/revise', [ChapterController::class, 'updateStudentChapter'])->name('chapter.update');
 });
 
+// --- ADMIN ROUTES (separate from approved middleware to avoid conflicts) ---
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [UserController::class, 'adminDashboard'])->name('admin.dashboard');
+    Route::post('/admin/approve-user/{id}', [UserController::class, 'approveUser'])->name('admin.approve.user');
+    Route::post('/admin/suspend-user/{id}', [UserController::class, 'suspendUser'])->name('admin.suspend.user');
+    Route::post('/admin/readmit-user/{id}', [UserController::class, 'readmitUser'])->name('admin.readmit.user');
+    Route::delete('/admin/delete-user/{id}', [UserController::class, 'deleteUser'])->name('admin.delete.user');
+    Route::post('/admin/reset-password/{id}', [UserController::class, 'triggerPasswordReset'])->name('admin.reset.password');
+});
+
 // --- SHARED PROFILE & SYSTEM ROUTES ---
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');

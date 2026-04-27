@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chapter;
+use App\Mail\ChapterApprovedMail;
+use App\Mail\ChapterReopenedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class ChapterController extends Controller
@@ -116,10 +120,28 @@ class ChapterController extends Controller
             'status' => 'required|in:pending,revision_requested,approved',
         ]);
 
+        // Prevent spamming by checking if status was recently changed
+        $cacheKey = "chapter_status_{$chapter->id}";
+        if (Cache::has($cacheKey)) {
+            return redirect()->back()->with('error', 'Please wait a moment before updating the chapter status again.');
+        }
+
+        // Cache the status change for 30 seconds to prevent rapid updates
+        Cache::put($cacheKey, true, 30);
+
         $chapter->update([
             'supervisor_comment' => $request->input('comment'),
             'status' => $request->status,
         ]);
+
+        // Send email notification asynchronously
+        if ($request->status === 'approved') {
+            Mail::to($chapter->user->email)
+                ->queue(new ChapterApprovedMail($chapter, $chapter->user->name));
+        } elseif ($request->status === 'revision_requested') {
+            Mail::to($chapter->user->email)
+                ->queue(new ChapterReopenedMail($chapter, $chapter->user->name));
+        }
 
         return redirect()->back()->with('success', 'Feedback saved. The student will see your comment on their dashboard.');
     }
@@ -145,6 +167,15 @@ class ChapterController extends Controller
             'comment' => 'nullable|string|max:2000',
         ]);
 
+        // Prevent spamming by checking if chapter was recently re-opened
+        $cacheKey = "chapter_reopen_{$chapter->id}";
+        if (Cache::has($cacheKey)) {
+            return redirect()->back()->with('error', 'Please wait a moment before re-opening this chapter again.');
+        }
+
+        // Cache the reopen action for 30 seconds to prevent rapid updates
+        Cache::put($cacheKey, true, 30);
+
         $note = trim((string) $request->input('comment'));
         $stamp = '['.now()->format('Y-m-d H:i').'] Chapter re-opened for revision by supervisor.';
         $existing = $chapter->supervisor_comment ? trim($chapter->supervisor_comment) : '';
@@ -156,6 +187,10 @@ class ChapterController extends Controller
             'supervisor_comment' => $merged,
             'status' => 'revision_requested',
         ]);
+
+        // Send email notification asynchronously
+        Mail::to($chapter->user->email)
+            ->queue(new ChapterReopenedMail($chapter, $chapter->user->name));
 
         return redirect()->back()->with('success', 'Chapter re-opened. The student can edit and re-upload this chapter again.');
     }

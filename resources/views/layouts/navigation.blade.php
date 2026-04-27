@@ -41,11 +41,57 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
+                        <!-- User Info Header -->
+                        <div class="px-4 py-3 border-b border-slate-200">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-full flex items-center justify-center text-white font-black text-xs uppercase shrink-0">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ Auth::user()->email }}</div>
+                                    @if(Auth::user()->university_id)
+                                    <div class="text-xs text-indigo-600 font-mono">{{ Auth::user()->university_id }}</div>
+                                    @endif
+                                    
+                                    <!-- Role-specific information -->
+                                    @if(Auth::user()->role === 'supervisor')
+                                        @php
+                                            $studentCount = App\Models\User::where('supervisor_id', Auth::id())->where('request_status', 'approved')->count();
+                                        @endphp
+                                        <div class="text-xs text-emerald-600 font-semibold mt-1">
+                                            {{ $studentCount }} Student{{ $studentCount != 1 ? 's' : '' }}
+                                        </div>
+                                        @if(Auth::user()->phone)
+                                            <div class="text-xs text-slate-500 font-mono mt-1">
+                                                {{ Auth::user()->phone }}
+                                            </div>
+                                        @endif
+                                    @elseif(Auth::user()->role === 'student')
+                                        @if(Auth::user()->supervisor)
+                                            <div class="text-xs text-amber-600 font-semibold mt-1">
+                                                Supervisor: {{ Auth::user()->supervisor->name }}
+                                            </div>
+                                            <div class="text-xs text-slate-500 font-mono">
+                                                {{ Auth::user()->supervisor->email }}
+                                            </div>
+                                            @if(Auth::user()->supervisor->phone)
+                                                <div class="text-xs text-slate-500 font-mono mt-1">
+                                                    {{ Auth::user()->supervisor->phone }}
+                                                </div>
+                                            @endif
+                                        @endif
+                                        @if(Auth::user()->phone)
+                                            <div class="text-xs text-slate-500 font-mono mt-1">
+                                                {{ Auth::user()->phone }}
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
 
-                        <!-- Authentication -->
+                        <!-- Authentication - Moved to Top -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
@@ -55,6 +101,13 @@
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
+
+                        <!-- Profile Link - Only for Admins -->
+                        @if(Auth::user()->role === 'admin')
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile Settings') }}
+                            </x-dropdown-link>
+                        @endif
                     </x-slot>
                 </x-dropdown>
             </div>
@@ -84,14 +137,44 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                
+                <!-- Role-specific information for mobile -->
+                @if(Auth::user()->role === 'supervisor')
+                    @php
+                        $studentCount = App\Models\User::where('supervisor_id', Auth::id())->where('request_status', 'approved')->count();
+                    @endphp
+                    <div class="text-xs text-emerald-600 font-semibold mt-1">
+                        {{ $studentCount }} Student{{ $studentCount != 1 ? 's' : '' }}
+                    </div>
+                    @if(Auth::user()->phone)
+                        <div class="text-xs text-slate-500 font-mono mt-1">
+                            {{ Auth::user()->phone }}
+                        </div>
+                    @endif
+                @elseif(Auth::user()->role === 'student')
+                    @if(Auth::user()->supervisor)
+                        <div class="text-xs text-amber-600 font-semibold mt-1">
+                            Supervisor: {{ Auth::user()->supervisor->name }}
+                        </div>
+                        <div class="text-xs text-slate-500 font-mono">
+                            {{ Auth::user()->supervisor->email }}
+                        </div>
+                        @if(Auth::user()->supervisor->phone)
+                            <div class="text-xs text-slate-500 font-mono mt-1">
+                                {{ Auth::user()->supervisor->phone }}
+                            </div>
+                        @endif
+                    @endif
+                    @if(Auth::user()->phone)
+                        <div class="text-xs text-slate-500 font-mono mt-1">
+                            {{ Auth::user()->phone }}
+                        </div>
+                    @endif
+                @endif
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
+                <!-- Authentication - Moved to Top -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
@@ -101,6 +184,13 @@
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
+
+                <!-- Profile Link - Only for Admins -->
+                @if(Auth::user()->role === 'admin')
+                    <x-responsive-nav-link :href="route('profile.edit')">
+                        {{ __('Profile') }}
+                    </x-responsive-nav-link>
+                @endif
             </div>
         </div>
     </div>

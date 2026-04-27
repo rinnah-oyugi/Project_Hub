@@ -10,7 +10,7 @@ class EnsureAccountIsApproved
 {
     /**
      * Supervisors need admin approval; students are active by default.
-     * Admins always pass.
+     * Admins immediately bypass all approval checks.
      *
      * @param  Closure(Request): (Response)  $next
      */
@@ -18,11 +18,16 @@ class EnsureAccountIsApproved
     {
         $user = $request->user();
 
+        // Admin users bypass all approval checks immediately
+        if ($user && $user->role === 'admin') {
+            return $next($request);
+        }
+
         if (! $user) {
             return $next($request);
         }
 
-        if ($user->role === 'admin' || $user->role === 'student' || $user->is_approved) {
+        if ($user->role === 'student' || $user->is_approved) {
             return $next($request);
         }
 

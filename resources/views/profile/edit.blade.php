@@ -1,47 +1,137 @@
-<!DOCTYPE html>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400/30">
+                    <span class="material-icons text-white text-xl" aria-hidden="true">person</span>
+                </div>
+                <div>
+                    <h2 class="font-black text-3xl text-white leading-tight tracking-tight uppercase">
+                        Profile <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Settings</span>
+                    </h2>
+                    <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Account information · contact details · preferences</p>
+                </div>
+            </div>
+        </div>
+    </x-slot>
 
-<html class="light" lang="en">
+    <div class="py-12 bg-slate-950 min-h-screen font-display">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                    <span class="material-icons text-sm">arrow_back</span>
+                    Back to Dashboard
+                </a>
+            </div>
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Supervisor Academic Profile | Project Management System</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#3670e2",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#111721",
-                    },
-                    fontFamily: {
-                        "display": ["Lexend"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'Lexend', sans-serif;
-        }
-    </style>
-</head>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Profile Card -->
+                <div class="lg:col-span-1">
+                    <x-profile-card :user="$user" :show-contact="true" :is-own-profile="true" />
+                </div>
+
+                <!-- Edit Form -->
+                <div class="lg:col-span-2">
+                    <div class="bg-slate-900 rounded-[40px] border border-indigo-500/30 overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-indigo-500/20">
+                        <div class="px-6 sm:px-8 py-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900">
+                            <h3 class="text-xl font-bold text-white">Edit Profile Information</h3>
+                            <p class="text-slate-400 text-sm mt-1">Update your personal and contact information</p>
+                        </div>
+                        
+                        <div class="p-6 sm:p-8">
+                            @if ($errors->any())
+                                <div class="mb-6 rounded-2xl border border-red-500/40 bg-red-950/50 px-6 py-4 text-sm text-red-100">
+                                    <p class="font-black uppercase text-[10px] tracking-widest text-red-300 mb-2">Please fix the following</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('profile.update') }}" class="space-y-6">
+                                @csrf
+                                @method('PATCH')
+
+                                <!-- Basic Information -->
+                                <div class="space-y-6">
+                                    <h4 class="text-lg font-bold text-white border-b border-slate-800 pb-2">Basic Information</h4>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Full Name</label>
+                                            <input name="name" type="text" value="{{ $user->name }}" required 
+                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-2">University ID</label>
+                                            <input name="university_id" type="text" value="{{ $user->university_id }}" required 
+                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Email Address</label>
+                                        <input name="email" type="email" value="{{ $user->email }}" required 
+                                               class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all">
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Department</label>
+                                        <select name="department" required 
+                                                class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all">
+                                            <option value="Computer Science" {{ $user->department === 'Computer Science' ? 'selected' : '' }}>Computer Science</option>
+                                            <option value="Engineering" {{ $user->department === 'Engineering' ? 'selected' : '' }}>Engineering</option>
+                                            <option value="Business" {{ $user->department === 'Business' ? 'selected' : '' }}>Business</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <div class="space-y-6">
+                                    <h4 class="text-lg font-bold text-white border-b border-slate-800 pb-2">Contact Information</h4>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Phone Number</label>
+                                            <input name="phone" type="tel" value="{{ $user->phone }}" 
+                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Emergency Phone</label>
+                                            <input name="emergency_phone" type="tel" value="{{ $user->emergency_phone }}" 
+                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Address</label>
+                                        <textarea name="address" rows="3" 
+                                                  class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all resize-none">{{ $user->address }}</textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Emergency Contact</label>
+                                        <input name="emergency_contact" type="text" value="{{ $user->emergency_contact }}" 
+                                               class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="pt-6">
+                                    <button type="submit" class="w-full py-5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-xl hover:from-indigo-500 hover:to-indigo-600 transition-all transform hover:-translate-y-1">
+                                        Update Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
     <!-- Navigation Bar -->

@@ -22,6 +22,23 @@
     <div class="py-12 bg-slate-950 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
+            <!-- Search Bar -->
+            <div class="bg-slate-900 rounded-3xl border border-indigo-500/30 p-6">
+                <form id="searchForm" onsubmit="searchStudent(event)" class="flex items-center gap-4">
+                    <div class="flex-1 relative">
+                        <span class="material-icons absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400">badge</span>
+                        <input type="text" 
+                               id="studentSearch" 
+                               name="university_id"
+                               placeholder="Search students by University ID..." 
+                               class="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent">
+                    </div>
+                    <button type="submit" class="px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors font-black uppercase tracking-wider text-xs">
+                        Search
+                    </button>
+                </form>
+            </div>
+
             @if ($errors->any())
                 <div class="rounded-2xl border border-red-500/40 bg-red-950/50 px-6 py-4 text-sm text-red-100">
                     <p class="font-black uppercase text-[10px] tracking-widest text-red-300 mb-2">Could not save feedback</p>
@@ -55,15 +72,74 @@
                 <table class="w-full text-left">
                     <tbody class="divide-y divide-slate-800/50">
                         @forelse($students->where('request_status', 'pending') as $student)
-                        <tr class="hover:bg-slate-800/30">
-                            <td class="px-8 py-6 text-white font-bold">{{ $student->name }}</td>
-                            <td class="px-8 py-6 text-slate-300 text-sm">{{ $student->project_title }}</td>
+                        <tr class="hover:bg-slate-800/30" data-university-id="{{ $student->university_id }}">
+                            <td class="px-8 py-6 text-white font-bold">
+                                <div class="flex items-center gap-2">
+                                    {{ $student->name }}
+                                    @if($student->university_id)
+                                        <span class="text-xs text-indigo-400 font-mono bg-indigo-900/50 px-2 py-1 rounded">{{ $student->university_id }}</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div>
+                                    <p class="text-slate-300 text-sm font-medium">{{ $student->project_title }}</p>
+                                    @if($student->project_description)
+                                        <p class="text-slate-500 text-xs mt-2">{{ substr($student->project_description, 0, 150) }}{{ strlen($student->project_description) > 150 ? '...' : '' }}</p>
+                                    @endif
+                                    @if($student->proposal_student_comment)
+                                        <div class="mt-3 p-3 bg-amber-950/30 border border-amber-500/40 rounded-xl">
+                                            <p class="text-xs text-amber-300 font-semibold mb-1">Student Comments:</p>
+                                            <p class="text-xs text-amber-100">{{ $student->proposal_student_comment }}</p>
+                                        </div>
+                                    @endif
+                                    @if($student->proposal_supervisor_comment)
+                                        <div class="mt-3 p-3 bg-indigo-950/30 border border-indigo-500/40 rounded-xl">
+                                            <p class="text-xs text-indigo-300 font-semibold mb-1">Your Feedback:</p>
+                                            <p class="text-xs text-indigo-100">{{ $student->proposal_supervisor_comment }}</p>
+                                        </div>
+                                    @endif
+                                    @if($student->proposal_file_path)
+                                        <a href="{{ Storage::url($student->proposal_file_path) }}" 
+                                           download="proposal_{{ $student->name }}_{{ $student->id }}.{{ pathinfo($student->proposal_file_path, PATHINFO_EXTENSION) }}"
+                                           class="inline-flex items-center gap-1 mt-2 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                                            <span class="material-icons text-sm">download</span>
+                                            Download Proposal
+                                        </a>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-8 py-6 text-right">
-                                <form action="{{ route('status.update', $student->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="approved">
-                                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase">Approve</button>
-                                </form>
+                                <div class="space-y-3">
+                                    <!-- Download Button -->
+                                    @if($student->proposal_file_path)
+                                        <a href="{{ Storage::url($student->proposal_file_path) }}" 
+                                           download="proposal_{{ $student->name }}_{{ $student->id }}.{{ pathinfo($student->proposal_file_path, PATHINFO_EXTENSION) }}"
+                                           class="inline-flex items-center gap-1 px-3 py-2 bg-amber-600 text-white rounded-xl text-xs font-black uppercase hover:bg-amber-700 transition-colors">
+                                            <span class="material-icons text-sm">download</span>
+                                            Download
+                                        </a>
+                                    @endif
+                                    
+                                    <!-- Feedback Form -->
+                                    <form action="{{ route('proposal.feedback', $student->id) }}" method="POST" class="space-y-2">
+                                        @csrf
+                                        <div class="flex items-center gap-2">
+                                            <select name="proposal_status" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:ring-2 focus:ring-indigo-500/50">
+                                                <option value="pending" {{ $student->proposal_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                <option value="approved" {{ $student->proposal_status === 'approved' ? 'selected' : '' }}>Approved</option>
+                                                <option value="rejected" {{ $student->proposal_status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                            </select>
+                                            <button type="submit" class="px-3 py-2 bg-indigo-600 text-white rounded-lg text-xs font-black uppercase hover:bg-indigo-700 transition-colors">
+                                                Update
+                                            </button>
+                                        </div>
+                                        <textarea name="proposal_supervisor_comment" 
+                                                  placeholder="Add feedback..." 
+                                                  rows="2"
+                                                  class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/50 resize-none">{{ $student->proposal_supervisor_comment }}</textarea>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -86,6 +162,28 @@
                                     <h4 class="text-white font-black text-xl">{{ $student->name }}</h4>
                                     <p class="text-indigo-400 text-sm font-medium">{{ $student->project_title ?? '—' }}</p>
                                     <p class="text-slate-500 text-xs mt-2 uppercase tracking-widest font-bold">Proposal: <span class="text-slate-400">{{ $student->request_status }}</span></p>
+                                    
+                                    <!-- Student Contact Details -->
+                                    <div class="mt-3 space-y-1">
+                                        @if($student->phone)
+                                            <p class="text-xs text-amber-400">
+                                                <span class="material-icons text-xs align-middle mr-1">phone</span>
+                                                {{ $student->phone }}
+                                            </p>
+                                        @endif
+                                        @if($student->email)
+                                            <p class="text-xs text-slate-400">
+                                                <span class="material-icons text-xs align-middle mr-1">email</span>
+                                                {{ $student->email }}
+                                            </p>
+                                        @endif
+                                        @if($student->university_id)
+                                            <p class="text-xs text-indigo-400 font-mono">
+                                                <span class="material-icons text-xs align-middle mr-1">badge</span>
+                                                {{ $student->university_id }}
+                                            </p>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
@@ -176,3 +274,68 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+function searchStudent(event) {
+    event.preventDefault();
+    
+    const searchValue = document.getElementById('studentSearch').value.trim();
+    
+    if (!searchValue) {
+        alert('Please enter a University ID to search');
+        return;
+    }
+    
+    // Find student in current list
+    const studentRows = document.querySelectorAll('tbody tr');
+    let foundStudent = null;
+    
+    studentRows.forEach(row => {
+        const universityId = row.getAttribute('data-university-id');
+        if (universityId && universityId.toLowerCase().includes(searchValue.toLowerCase())) {
+            foundStudent = row;
+            // Show row and scroll to it
+            row.style.display = '';
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight row temporarily
+            row.classList.add('bg-amber-950/50', 'ring-2', 'ring-amber-500');
+            setTimeout(() => {
+                row.classList.remove('bg-amber-950/50', 'ring-2', 'ring-amber-500');
+            }, 3000);
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    if (!foundStudent) {
+        alert('No student found with University ID: ' + searchValue);
+        // Show all rows again
+        studentRows.forEach(row => {
+            row.style.display = '';
+        });
+    }
+}
+
+function filterStudents() {
+    const searchValue = document.getElementById('studentSearch').value.toLowerCase();
+    const studentRows = document.querySelectorAll('tbody tr');
+    
+    studentRows.forEach(row => {
+        const universityId = row.getAttribute('data-university-id');
+        if (universityId && universityId.toLowerCase().includes(searchValue)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Add event listener for search input
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('studentSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterStudents);
+    }
+});
+</script>

@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('proposal.store') }}" class="space-y-8 pb-32">
+    <form method="POST" action="{{ route('proposal.store') }}" enctype="multipart/form-data" class="space-y-8 pb-32">
         @csrf
         
         <section class="space-y-4">
@@ -54,6 +54,25 @@
             <div class="space-y-2">
                 <label class="text-sm font-medium text-slate-700">Project Description</label>
                 <textarea name="project_description" rows="5" required class="w-full px-5 py-4 border-none rounded-xl bg-slate-50 focus:ring-2 focus:ring-primary/40 text-slate-900" placeholder="Summarize your project objectives..."></textarea>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-700">Student Comments (Optional)</label>
+                <textarea name="proposal_student_comment" rows="3" class="w-full px-5 py-4 border-none rounded-xl bg-slate-50 focus:ring-2 focus:ring-primary/40 text-slate-900" placeholder="Describe your objectives, methodology, and expected outcomes..."></textarea>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-700">Proposal Document (Optional)</label>
+                <div class="relative">
+                    <input type="file" 
+                           name="proposal_file" 
+                           accept=".pdf,.docx" 
+                           class="w-full px-5 py-4 border-none rounded-xl bg-slate-50 focus:ring-2 focus:ring-primary/40 text-slate-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90 cursor-pointer"
+                           id="proposal_file">
+                    <div class="mt-2 text-xs text-slate-500">
+                        Accepted formats: PDF, DOCX (Max: 10MB)
+                    </div>
+                </div>
             </div>
         </section>
 

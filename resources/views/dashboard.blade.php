@@ -1,9 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-black text-3xl text-white leading-tight tracking-tight">
-            {{ __('STUDENT PORTAL') }}
-        </h2>
-        <p class="text-slate-500 text-xs mt-1 font-medium uppercase tracking-widest">Project Progress Tracker</p>
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/30">
+                <span class="material-icons text-white text-xl" aria-hidden="true">school</span>
+            </div>
+            <div>
+                <h2 class="font-black text-3xl text-white leading-tight tracking-tight">
+                    {{ __('STUDENT PORTAL') }}
+                </h2>
+                <p class="text-amber-400 text-xs mt-1 font-medium uppercase tracking-widest">Project Progress Tracker</p>
+            </div>
+        </div>
     </x-slot>
 
     @php
@@ -14,16 +21,21 @@
         $needsProposalForm = ! $proposalApproved && (! $u->hasProposal() || $proposalDeclined);
     @endphp
 
-    <div class="py-12 bg-slate-100 min-h-screen">
+    <div class="py-12 bg-gradient-to-br from-amber-50/50 to-slate-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="space-y-8">
-                <h2 class="text-2xl font-bold text-slate-900">Project Status</h2>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+                        <span class="material-icons text-white text-sm" aria-hidden="true">analytics</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Project Status</h2>
+                </div>
 
                 {{-- Proposal approved: new upload + chapter timeline --}}
                 @if ($proposalApproved)
-                    <div class="rounded-[40px] border border-indigo-500/30 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-6 sm:p-10 shadow-sm ring-1 ring-indigo-500/15">
+                    <div class="rounded-[40px] border border-amber-500/30 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-6 sm:p-10 shadow-sm ring-1 ring-amber-500/15">
                         <div class="flex flex-col md:flex-row items-start gap-6 mb-8">
-                            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
+                            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30">
                                 <span class="material-icons text-3xl" aria-hidden="true">check_circle</span>
                             </div>
                             <div>
@@ -34,26 +46,26 @@
                         </div>
 
                         {{-- New chapter --}}
-                        <div class="rounded-3xl border-2 border-dashed border-indigo-400/50 bg-white p-6 sm:p-8 shadow-inner mb-10">
+                        <div class="rounded-3xl border-2 border-dashed border-amber-400/50 bg-white p-6 sm:p-8 shadow-inner mb-10">
                             <div class="flex items-center gap-2 mb-6">
-                                <span class="material-icons text-indigo-600" aria-hidden="true">upload_file</span>
+                                <span class="material-icons text-amber-600" aria-hidden="true">upload_file</span>
                                 <h4 class="text-sm font-black text-slate-900 uppercase tracking-widest">Submit a new chapter</h4>
                             </div>
                             <form action="{{ route('chapter.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                                 @csrf
                                 <div class="space-y-2">
                                     <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Chapter name</label>
-                                    <input type="text" name="chapter_name" value="{{ old('chapter_name') }}" required placeholder="e.g. Chapter 2 — Methodology" class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30" />
+                                    <input type="text" name="chapter_name" value="{{ old('chapter_name') }}" required placeholder="e.g. Chapter 2 — Methodology" class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30" />
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-xs font-bold uppercase tracking-wider text-slate-700">File (PDF or DOCX)</label>
-                                    <input type="file" name="chapter_file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="block w-full text-sm text-slate-800 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2.5 file:text-xs file:font-black file:uppercase file:text-white hover:file:bg-indigo-700 cursor-pointer" />
+                                    <input type="file" name="chapter_file" required accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="block w-full text-sm text-slate-800 file:mr-4 file:rounded-lg file:border-0 file:bg-amber-500 file:px-4 file:py-2.5 file:text-xs file:font-black file:uppercase file:text-white hover:file:bg-amber-600 cursor-pointer" />
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Student notes <span class="text-slate-500 font-medium normal-case">(your supervisor sees this next to the file)</span></label>
-                                    <textarea name="student_comment" rows="3" placeholder="Context, questions, or what changed in this draft…" class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30">{{ old('student_comment') }}</textarea>
+                                    <textarea name="student_comment" rows="3" placeholder="Context, questions, or what changed in this draft…" class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30">{{ old('student_comment') }}</textarea>
                                 </div>
-                                <button type="submit" class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-8 py-3.5 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition">
+                                <button type="submit" class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3.5 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-amber-500/25 hover:from-amber-600 hover:to-amber-700 transition">
                                     <span class="material-icons text-base" aria-hidden="true">cloud_upload</span>
                                     Upload chapter
                                 </button>

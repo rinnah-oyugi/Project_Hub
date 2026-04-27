@@ -39,7 +39,7 @@
                 The ultimate workspace for final year students and faculty supervisors to collaborate on thesis projects.
             </p>
             <div class="flex justify-center gap-4">
-                 <a href="#onboarding" class="px-10 py-5 bg-white text-indigo-900 font-black rounded-2xl shadow-2xl hover:scale-105 transition-transform">Begin Your Journey</a>
+                 <a href="#onboarding" onclick="document.getElementById('onboarding').scrollIntoView({behavior: 'smooth'}); return false;" class="px-10 py-5 bg-white text-indigo-900 font-black rounded-2xl shadow-2xl hover:scale-105 transition-transform cursor-pointer">Begin Your Journey</a>
             </div>
         </div>
         <div class="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
@@ -81,6 +81,11 @@
 
     <footer class="py-10 text-center text-slate-400 text-xs uppercase tracking-widest">
         &copy; 2026 ProjectHub Hub · Built for Academic Excellence
+        <div class="mt-2">
+            <a href="{{ route('login') }}" class="text-slate-500 hover:text-slate-300 transition-colors">
+                Staff Portal
+            </a>
+        </div>
     </footer>
 
 </body>
