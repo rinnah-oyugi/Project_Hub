@@ -39,4 +39,5 @@ EXPOSE 80
 # Update Apache config to point to Laravel's /public folder
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-CMD ["apache2-foreground"]
+# Create a small script to migrate and then start the server
+CMD php artisan migrate --force && apache2-foreground
