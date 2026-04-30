@@ -41,3 +41,4 @@ php artisan migrate
 
 ## Verification
 Test by registering a new user - should work without 500 error.
+

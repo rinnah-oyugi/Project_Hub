@@ -1,6 +1,5 @@
 # Production Environment Configuration
 
-Replace your current .env file with these settings for production deployment:
 
 ```env
 APP_NAME="ProjectHub"

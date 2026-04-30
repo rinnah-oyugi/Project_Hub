@@ -15,11 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'approved' => \App\Http\Middleware\EnsureAccountIsApproved::class,
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'redirect.auth' => \App\Http\Middleware\RedirectAuthenticatedUsers::class,
         ]);
 
         $middleware->redirectTo(
             guests: '/login',
-            users: '/dashboard',
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {

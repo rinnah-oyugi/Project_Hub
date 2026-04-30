@@ -40,7 +40,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight">Proposal approved</h3>
-                                <p class="text-slate-800 font-semibold mt-1">{{ $u->project_title }}</p>
+                                <p class="text-slate-800 font-semibold mt-1">{{ $u->project_title ?? 'Untitled Project' }}</p>
                                 <p class="text-slate-600 text-sm mt-2 max-w-2xl">You are linked to your supervisor for this project. Submit new chapters below; you can revise any chapter until your supervisor marks it <span class="text-emerald-700 font-semibold">Approved</span> (then it locks).</p>
                             </div>
                         </div>
@@ -80,18 +80,19 @@
                                     <h4 class="text-xs font-black uppercase tracking-[0.2em] text-slate-600">Your chapters</h4>
                                 </div>
                                 <div class="relative pl-4 sm:pl-6 border-l-2 border-indigo-200/80 space-y-4">
-                                    @foreach ($u->chapters as $ch)
-                                        @php
-                                            $editable = in_array($ch->status, ['pending', 'revision_requested'], true);
-                                        @endphp
+                                    @if ($u->chapters && $u->chapters->count() > 0)
+                                        @foreach ($u->chapters as $ch)
+                                            @php
+                                                $editable = in_array($ch->status ?? 'pending', ['pending', 'revision_requested'], true);
+                                            @endphp
                                         <div class="relative pl-6 sm:pl-8" x-data="{ open: {{ $editable ? 'true' : 'false' }} }">
                                             <span class="absolute -left-[9px] sm:-left-[11px] top-3 h-4 w-4 rounded-full border-2 border-white shadow {{ $ch->status === 'approved' ? 'bg-emerald-500' : ($ch->status === 'revision_requested' ? 'bg-amber-500' : 'bg-indigo-500') }}"></span>
 
                                             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden ring-1 ring-slate-200/80">
                                                 <button type="button" @click="open = !open" class="flex w-full items-center justify-between gap-4 px-4 py-4 text-left hover:bg-slate-50 transition">
                                                     <div class="min-w-0">
-                                                        <p class="font-bold text-slate-900 truncate">{{ $ch->chapter_name }}</p>
-                                                        <p class="text-xs text-slate-500 mt-0.5">Uploaded {{ $ch->created_at->format('M j, Y') }} · {{ $ch->created_at->diffForHumans() }}</p>
+                                                        <p class="font-bold text-slate-900 truncate">{{ $ch->chapter_name ?? 'Untitled Chapter' }}</p>
+                                                        <p class="text-xs text-slate-500 mt-0.5">Uploaded {{ $ch->created_at?->format('M j, Y') ?? 'Unknown date' }} · {{ $ch->created_at?->diffForHumans() ?? 'Unknown time' }}</p>
                                                     </div>
                                                     <div class="flex items-center gap-2 shrink-0">
                                                         @if ($ch->status === 'pending')
@@ -167,6 +168,7 @@
                                 </div>
                             </div>
                         @endif
+                                    @endif
                     </div>
 
                 @elseif ($proposalPending)

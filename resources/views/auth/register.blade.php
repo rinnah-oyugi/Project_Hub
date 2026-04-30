@@ -115,24 +115,13 @@
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                    <input name="phone" type="tel" class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white transition-all" placeholder="+254 712 345 678" />
-                </div>
-
-                <div class="space-y-1">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address</label>
                     <textarea name="address" rows="2" class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white transition-all resize-none" placeholder="Campus Address, Room Number"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Emergency Contact</label>
-                        <input name="emergency_contact" type="text" class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white transition-all" placeholder="Parent/Guardian Name" />
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Emergency Phone</label>
-                        <input name="emergency_phone" type="tel" class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white transition-all" placeholder="+254 712 345 678" />
-                    </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Emergency Contact</label>
+                    <input name="emergency_contact" type="text" class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white transition-all" placeholder="Parent/Guardian Name" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

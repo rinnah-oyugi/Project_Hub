@@ -22,7 +22,7 @@
     </x-slot>
 
     <div class="py-12 bg-slate-950 min-h-screen font-display">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="group bg-slate-900 p-8 rounded-[40px] border border-indigo-500/30 hover:border-indigo-500/50 transition-all relative overflow-hidden">
@@ -61,6 +61,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Spacer after statistics -->
+            <div class="h-12"></div>
 
             <!-- Supervisors Section -->
             <section class="space-y-8">
@@ -198,6 +201,9 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Spacer between sections -->
+            <div class="h-8"></div>
 
             <!-- Students Section -->
             <section class="space-y-8">

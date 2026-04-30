@@ -31,19 +31,22 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // Debug: Log the user role
+        \Log::info('Login redirect - User: ' . $user->email . ', Role: ' . $user->role);
+
+        // Role-based redirects with intended URL handling
         if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
+            \Log::info('Redirecting admin to admin.dashboard');
+            return redirect()->intended(route('admin.dashboard'));
         }
-
+        
         if ($user->role === 'supervisor') {
-            return redirect()->route('supervisor.dashboard');
+            \Log::info('Redirecting supervisor to supervisor.dashboard');
+            return redirect()->intended(route('supervisor.dashboard'));
         }
-
-        if ($user->role === 'student') {
-            return redirect()->route('dashboard');
-        }
-
-        return redirect()->route('login');
+        
+        \Log::info('Redirecting to dashboard (student/default)');
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

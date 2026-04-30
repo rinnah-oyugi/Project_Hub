@@ -109,7 +109,7 @@ class ChapterController extends Controller
     {
         $supervisor = Auth::user();
 
-        $chapter->loadMissing('user:id,supervisor_id,role');
+        $chapter->loadMissing('user:id,name,supervisor_id,role');
 
         if ($supervisor->role !== 'supervisor' || (int) $chapter->user->supervisor_id !== (int) $supervisor->id) {
             abort(403);
@@ -153,7 +153,7 @@ class ChapterController extends Controller
     {
         $supervisor = Auth::user();
 
-        $chapter->loadMissing('user:id,supervisor_id,role');
+        $chapter->loadMissing('user:id,name,supervisor_id,role');
 
         if ($supervisor->role !== 'supervisor' || (int) $chapter->user->supervisor_id !== (int) $supervisor->id) {
             abort(403);
@@ -202,7 +202,7 @@ class ChapterController extends Controller
     {
         $user = Auth::user();
 
-        $chapter->loadMissing('user:id,supervisor_id,role');
+        $chapter->loadMissing('user:id,name,supervisor_id,role');
 
         $ownsChapter = (int) $chapter->user_id === (int) $user->id;
         $isSupervisorOfAuthor = $user->role === 'supervisor'

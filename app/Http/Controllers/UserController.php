@@ -24,25 +24,58 @@ class UserController extends Controller
      */
     public function adminDashboard()
     {
-        $directoryUsers = User::query()
-            ->where('role', '!=', 'admin')
-            ->orderByDesc('created_at')
-            ->with(['students' => function($query) {
-                $query->select('id', 'supervisor_id', 'name');
-            }])
-            ->with(['supervisor' => function($query) {
-                $query->select('id', 'name');
-            }])
-            ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at', 'supervisor_id']);
+        try {
+            \Log::info('Admin dashboard method called - User: ' . Auth::user()->email . ', Role: ' . Auth::user()->role);
+            
+            // Debug: Check if user is actually admin
+            if (Auth::user()->role !== 'admin') {
+                \Log::error('Non-admin user tried to access admin dashboard: ' . Auth::user()->email . ', Role: ' . Auth::user()->role);
+                abort(403, 'Access denied. User role: ' . Auth::user()->role);
+            }
 
-        $pendingSupervisors = $directoryUsers->where('role', 'supervisor')->where('is_approved', false)->count();
+            \Log::info('Loading directory users...');
+            try {
+                // Simplify query to isolate the issue
+                $directoryUsers = User::query()
+                    ->where('role', '!=', 'admin')
+                    ->orderByDesc('created_at')
+                    ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at', 'supervisor_id']);
 
-        return view('admin.dashboard', [
-            'directoryUsers' => $directoryUsers,
-            'pendingCount' => $pendingSupervisors,
-            'pendingSupervisors' => $pendingSupervisors,
-            'totalUsers' => User::count(),
-        ]);
+                \Log::info('Directory users loaded: ' . $directoryUsers->count() . ' users');
+                
+                // Try to load relationships separately
+                foreach ($directoryUsers as $user) {
+                    if ($user->role === 'supervisor') {
+                        try {
+                            $user->students = User::where('supervisor_id', $user->id)->get(['id', 'name']);
+                        } catch (\Exception $e) {
+                            \Log::error('Error loading students for supervisor ' . $user->id . ': ' . $e->getMessage());
+                            $user->students = collect([]);
+                        }
+                    }
+                }
+                
+                $pendingSupervisors = $directoryUsers->where('role', 'supervisor')->where('is_approved', false)->count();
+                $totalUsers = User::count();
+            } catch (\Exception $e) {
+                \Log::error('Error loading directory users: ' . $e->getMessage());
+                // Fallback to empty data
+                $directoryUsers = collect([]);
+                $pendingSupervisors = 0;
+                $totalUsers = 0;
+            }
+
+            \Log::info('Returning admin dashboard view...');
+            return view('admin.dashboard', [
+                'directoryUsers' => $directoryUsers,
+                'pendingCount' => $pendingSupervisors,
+                'pendingSupervisors' => $pendingSupervisors,
+                'totalUsers' => $totalUsers,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Admin dashboard error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' line ' . $e->getLine());
+            return redirect()->route('login')->with('error', 'Admin dashboard error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -170,47 +203,80 @@ class UserController extends Controller
             abort(403);
         }
 
+        try {
+            $users = User::where('role', '!=', 'admin')
+                ->orderBy('role')
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at']);
+
+            $filename = "projecthub_users_" . date('Y-m-d_H-i-s') . ".csv";
+            
+            // Create CSV content in memory first
+            $csvContent = '';
+            
+            // Add CSV header
+            $csvContent .= "ID,Name,Email,Role,University ID,Department,Status,Registration Date\n";
+            
+            // Add CSV data
+            foreach ($users as $user) {
+                $status = $user->role === 'student' ? 'Active' : ($user->is_approved ? 'Active' : 'Suspended');
+                
+                $csvContent .= implode(',', [
+                    $user->id,
+                    '"' . str_replace('"', '""', $user->name) . '"',
+                    '"' . str_replace('"', '""', $user->email) . '"',
+                    ucfirst($user->role),
+                    '"' . ($user->university_id ?? 'N/A') . '"',
+                    '"' . ($user->department ?? 'N/A') . '"',
+                    $status,
+                    $user->created_at->format('Y-m-d H:i:s')
+                ]) . "\n";
+            }
+            
+            return response($csvContent)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Admin Action: Debug users - show all non-admin users
+     */
+    public function debugUsers()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $users = User::where('role', '!=', 'admin')
             ->orderBy('role')
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'role', 'university_id', 'department', 'is_approved', 'created_at']);
 
-        $filename = "projecthub_users_" . date('Y-m-d_H-i-s') . ".csv";
+        $output = "<h2>All Non-Admin Users (" . $users->count() . " total)</h2><table border='1' style='border-collapse: collapse; width: 100%;'>";
+        $output .= "<tr style='background: #f0f0f0;'><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>University ID</th><th>Department</th><th>Approved</th><th>Created</th><th>Action</th></tr>";
         
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function() use ($users) {
-            $file = fopen('php://output', 'w');
-            
-            // CSV Header
-            fputcsv($file, [
-                'ID', 'Name', 'Email', 'Role', 'University ID', 
-                'Department', 'Status', 'Registration Date'
-            ]);
-            
-            // CSV Data
-            foreach ($users as $user) {
-                $status = $user->role === 'student' ? 'Active' : ($user->is_approved ? 'Active' : 'Suspended');
-                
-                fputcsv($file, [
-                    $user->id,
-                    $user->name,
-                    $user->email,
-                    ucfirst($user->role),
-                    $user->university_id ?? 'N/A',
-                    $user->department ?? 'N/A',
-                    $status,
-                    $user->created_at->format('Y-m-d H:i:s')
-                ]);
-            }
-            
-            fclose($file);
-        };
-
-        return Response::stream($callback, 200, $headers);
+        foreach ($users as $user) {
+            $output .= "<tr>";
+            $output .= "<td>" . $user->id . "</td>";
+            $output .= "<td>" . $user->name . "</td>";
+            $output .= "<td>" . $user->email . "</td>";
+            $output .= "<td>" . ucfirst($user->role) . "</td>";
+            $output .= "<td>" . ($user->university_id ?? 'N/A') . "</td>";
+            $output .= "<td>" . ($user->department ?? 'N/A') . "</td>";
+            $output .= "<td>" . ($user->is_approved ? 'Yes' : 'No') . "</td>";
+            $output .= "<td>" . $user->created_at->format('Y-m-d') . "</td>";
+            $output .= "<td><a href='/admin/delete-user/" . $user->id . "' onclick='return confirm(\"Delete " . $user->name . "?\")'>Delete</a></td>";
+            $output .= "</tr>";
+        }
+        
+        $output .= "</table>";
+        $output .= "<br><a href='/admin/dashboard'>← Back to Dashboard</a>";
+        
+        return $output;
     }
 
     /**

@@ -92,19 +92,7 @@
                                 <div class="space-y-6">
                                     <h4 class="text-lg font-bold text-white border-b border-slate-800 pb-2">Contact Information</h4>
                                     
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Phone Number</label>
-                                            <input name="phone" type="tel" value="{{ $user->phone }}" 
-                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Emergency Phone</label>
-                                            <input name="emergency_phone" type="tel" value="{{ $user->emergency_phone }}" 
-                                                   class="w-full px-5 py-4 border border-slate-700 rounded-2xl bg-slate-800 text-white focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
-                                        </div>
-                                    </div>
-
+                                    
                                     <div>
                                         <label class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Address</label>
                                         <textarea name="address" rows="3" 

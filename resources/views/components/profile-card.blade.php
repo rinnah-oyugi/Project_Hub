@@ -50,15 +50,9 @@
         <!-- Contact Information -->
         <div class="border-t border-slate-800 pt-6">
             <h4 class="text-lg font-bold text-white mb-4">Contact Information</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @if($user->phone)
-                <div>
-                    <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Phone</span>
-                    <span class="text-sm text-slate-300">{{ $user->phone }}</span>
-                </div>
-                @endif
+            <div class="grid grid-cols-1 gap-6">
                 @if($user->address)
-                <div class="md:col-span-2">
+                <div>
                     <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2">Address</span>
                     <span class="text-sm text-slate-300">{{ $user->address }}</span>
                 </div>
@@ -67,12 +61,6 @@
                 <div>
                     <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest block mb-2">Emergency Contact</span>
                     <span class="text-sm text-slate-300">{{ $user->emergency_contact }}</span>
-                </div>
-                @endif
-                @if($user->emergency_phone)
-                <div>
-                    <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest block mb-2">Emergency Phone</span>
-                    <span class="text-sm text-slate-300">{{ $user->emergency_phone }}</span>
                 </div>
                 @endif
             </div>

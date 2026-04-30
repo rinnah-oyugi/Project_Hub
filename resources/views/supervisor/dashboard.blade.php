@@ -53,15 +53,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-900 p-8 rounded-3xl border border-indigo-500/30">
                     <p class="text-slate-500 text-xs font-black uppercase tracking-widest">Active Students</p>
-                    <h3 class="text-5xl font-black text-white mt-2">{{ $students->where('request_status', 'approved')->count() }}</h3>
+                    <h3 class="text-5xl font-black text-white mt-2">{{ $students?->where('request_status', 'approved')?->count() ?? 0 }}</h3>
                 </div>
                 <div class="bg-slate-900 p-8 rounded-3xl border border-indigo-500/30">
                     <p class="text-slate-500 text-xs font-black uppercase tracking-widest">Pending Proposals</p>
-                    <h3 class="text-5xl font-black text-amber-500 mt-2">{{ $students->where('request_status', 'pending')->count() }}</h3>
+                    <h3 class="text-5xl font-black text-amber-500 mt-2">{{ $students?->where('request_status', 'pending')?->count() ?? 0 }}</h3>
                 </div>
                 <div class="bg-slate-900 p-8 rounded-3xl border border-indigo-500/30">
                     <p class="text-slate-500 text-xs font-black uppercase tracking-widest">Approved Chapters</p>
-                    <h3 class="text-5xl font-black text-emerald-400 mt-2">{{ $approvedChapterCount }}</h3>
+                    <h3 class="text-5xl font-black text-emerald-400 mt-2">{{ $approvedChapterCount ?? 0 }}</h3>
                 </div>
             </div>
 
@@ -71,11 +71,11 @@
                 </div>
                 <table class="w-full text-left">
                     <tbody class="divide-y divide-slate-800/50">
-                        @forelse($students->where('request_status', 'pending') as $student)
-                        <tr class="hover:bg-slate-800/30" data-university-id="{{ $student->university_id }}">
+                        @forelse($students?->where('request_status', 'pending') as $student)
+                        <tr class="hover:bg-slate-800/30" data-university-id="{{ $student->university_id ?? '' }}">
                             <td class="px-8 py-6 text-white font-bold">
                                 <div class="flex items-center gap-2">
-                                    {{ $student->name }}
+                                    {{ $student->name ?? 'Unknown Student' }}
                                     @if($student->university_id)
                                         <span class="text-xs text-indigo-400 font-mono bg-indigo-900/50 px-2 py-1 rounded">{{ $student->university_id }}</span>
                                     @endif
@@ -83,9 +83,9 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div>
-                                    <p class="text-slate-300 text-sm font-medium">{{ $student->project_title }}</p>
+                                    <p class="text-slate-300 text-sm font-medium">{{ $student->project_title ?? 'No Project Title' }}</p>
                                     @if($student->project_description)
-                                        <p class="text-slate-500 text-xs mt-2">{{ substr($student->project_description, 0, 150) }}{{ strlen($student->project_description) > 150 ? '...' : '' }}</p>
+                                        <p class="text-slate-500 text-xs mt-2">{{ substr($student->project_description ?? '', 0, 150) }}{{ strlen($student->project_description ?? '') > 150 ? '...' : '' }}</p>
                                     @endif
                                     @if($student->proposal_student_comment)
                                         <div class="mt-3 p-3 bg-amber-950/30 border border-amber-500/40 rounded-xl">
@@ -165,12 +165,6 @@
                                     
                                     <!-- Student Contact Details -->
                                     <div class="mt-3 space-y-1">
-                                        @if($student->phone)
-                                            <p class="text-xs text-amber-400">
-                                                <span class="material-icons text-xs align-middle mr-1">phone</span>
-                                                {{ $student->phone }}
-                                            </p>
-                                        @endif
                                         @if($student->email)
                                             <p class="text-xs text-slate-400">
                                                 <span class="material-icons text-xs align-middle mr-1">email</span>

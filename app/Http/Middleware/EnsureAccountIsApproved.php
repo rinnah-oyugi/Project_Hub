@@ -31,7 +31,7 @@ class EnsureAccountIsApproved
             return $next($request);
         }
 
-        if ($request->routeIs('account.pending', 'verification.*', 'logout')) {
+        if ($request->routeIs('account.pending', 'verification.*', 'logout', 'dashboard', 'supervisor.dashboard', 'admin.dashboard')) {
             return $next($request);
         }
 

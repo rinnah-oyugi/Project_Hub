@@ -70,10 +70,19 @@ class ProposalController extends Controller
             abort(403, 'You are not assigned to this student.');
         }
 
-        $student->update([
+        $updateData = [
             'proposal_status' => $request->proposal_status,
             'proposal_supervisor_comment' => $request->proposal_supervisor_comment,
-        ]);
+        ];
+
+        // Also update request_status to reflect the proposal decision
+        if ($request->proposal_status === 'approved') {
+            $updateData['request_status'] = 'approved';
+        } elseif ($request->proposal_status === 'rejected') {
+            $updateData['request_status'] = 'declined';
+        }
+
+        $student->update($updateData);
 
         $statusMessage = match($request->proposal_status) {
             'approved' => 'Proposal approved successfully.',

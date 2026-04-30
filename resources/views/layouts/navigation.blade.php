@@ -60,11 +60,6 @@
                                         <div class="text-xs text-emerald-600 font-semibold mt-1">
                                             {{ $studentCount }} Student{{ $studentCount != 1 ? 's' : '' }}
                                         </div>
-                                        @if(Auth::user()->phone)
-                                            <div class="text-xs text-slate-500 font-mono mt-1">
-                                                {{ Auth::user()->phone }}
-                                            </div>
-                                        @endif
                                     @elseif(Auth::user()->role === 'student')
                                         @if(Auth::user()->supervisor)
                                             <div class="text-xs text-amber-600 font-semibold mt-1">
@@ -72,16 +67,6 @@
                                             </div>
                                             <div class="text-xs text-slate-500 font-mono">
                                                 {{ Auth::user()->supervisor->email }}
-                                            </div>
-                                            @if(Auth::user()->supervisor->phone)
-                                                <div class="text-xs text-slate-500 font-mono mt-1">
-                                                    {{ Auth::user()->supervisor->phone }}
-                                                </div>
-                                            @endif
-                                        @endif
-                                        @if(Auth::user()->phone)
-                                            <div class="text-xs text-slate-500 font-mono mt-1">
-                                                {{ Auth::user()->phone }}
                                             </div>
                                         @endif
                                     @endif
@@ -156,16 +141,6 @@
                         </div>
                         <div class="text-xs text-slate-500 font-mono">
                             {{ Auth::user()->supervisor->email }}
-                        </div>
-                        @if(Auth::user()->supervisor->phone)
-                            <div class="text-xs text-slate-500 font-mono mt-1">
-                                {{ Auth::user()->supervisor->phone }}
-                            </div>
-                        @endif
-                    @endif
-                    @if(Auth::user()->phone)
-                        <div class="text-xs text-slate-500 font-mono mt-1">
-                            {{ Auth::user()->phone }}
                         </div>
                     @endif
                 @endif
